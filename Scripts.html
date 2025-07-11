@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Docustream - Scripts</title>
+  <style>
+    body {
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      color: red;
+      text-align: center;
+    }
+    .script {
+      background: #111;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+    }
+    textarea {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      background: red;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎬 Available Scripts</h1>
+  <div id="scriptsContainer">Loading scripts...</div>
+
+  <script>
+    const email = localStorage.getItem("email");
+
+    if (!email) {
+      alert("Please log in first.");
+      window.location.href = "login.html";
+    }
+
+    async function fetchScripts() {
+      const res = await fetch('/.netlify/functions/get-scripts');
+      const scripts = await res.json();
+
+      const container = document.getElementById("scriptsContainer");
+      container.innerHTML = '';
+
+      scripts.forEach(script => {
+        const div = document.createElement('div');
+        div.className = 'script';
+        div.innerHTML = `
+          <h2>${script.title}</h2>
+          <p>${script.content}</p>
+          <textarea id="review-${script.id}" placeholder="Write your review..."></textarea>
+          <button onclick="submitReview(${script.id})">Submit Review</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function submitReview(scriptId) {
+      const reviewText = document.getElementById(`review-${scriptId}`).value;
+
+      const res = await fetch('/.netlify/functions/post-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          script_id: scriptId,
+          review: reviewText
+        })
+      });
+
+      const data = await res.json();
+      alert(data.message || data.error);
+    }
+
+    fetchScripts();
+  </script>
+</body>
+</html>
