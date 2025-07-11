@@ -137,5 +137,30 @@
   <footer>
     &copy; 2025 DocuStream. All rights reserved.
   </footer>
+
+  <!-- Auth0 Google Login Check -->
+  <script src="https://cdn.auth0.com/js/auth0/9.19/auth0.min.js"></script>
+  <script>
+    const auth0 = new auth0.WebAuth({
+      domain: 'dev-wcidh20trx5a85o5.us.auth0.com',
+      clientID: '1aFXnOc0ZkLBxO8cpm0oXfELgUuFItcu',
+      redirectUri: window.location.origin + '/home.html',
+      responseType: 'token id_token',
+      scope: 'openid profile email'
+    });
+
+    const hash = window.location.hash;
+    const token = new URLSearchParams(hash.replace('#','')).get('id_token');
+
+    if (!token) {
+      window.location.href = '/index.html';
+    } else {
+      const base64Url = token.split('.')[1];
+      const base64 = decodeURIComponent(atob(base64Url).split('').map(c =>
+        '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+      const payload = JSON.parse(base64);
+      console.log('User logged in:', payload.email);
+    }
+  </script>
 </body>
 </html>
