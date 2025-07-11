@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login - Docustream</title>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.13/auth0-spa-js.production.js"></script>
+</head>
+<body style="background:black; color:white; text-align:center; padding-top:100px;">
+  <h1>Welcome to Docustream</h1>
+  <button id="google-login" style="padding:10px 20px; font-size:18px;">Login with Google</button>
+
+  <script>
+    // Replace with your actual Auth0 domain & client ID
+    const auth0Domain = 'YOUR_DOMAIN.auth0.com';      // Example: dev-abc123.us.auth0.com
+    const auth0ClientId = 'YOUR_CLIENT_ID';           // Example: 4R3h3xLk3UhtXvgs3gB6sDkLbI3OZs7H
+
+    let auth0 = null;
+
+    const configureClient = async () => {
+      auth0 = await createAuth0Client({
+        domain: auth0Domain,
+        client_id: auth0ClientId,
+        redirect_uri: window.location.origin
+      });
+    };
+
+    window.onload = async () => {
+      await configureClient();
+
+      // If redirected after login
+      if (window.location.search.includes("code=")) {
+        await auth0.handleRedirectCallback();
+        const user = await auth0.getUser();
+        console.log("Logged in:", user);
+        localStorage.setItem("email", user.email);
+        window.location.href = "scripts.html";
+      }
+
+      document.getElementById("google-login").addEventListener("click", async () => {
+        await auth0.loginWithRedirect();
+      });
+    };
+  </script>
+</body>
+</html>
